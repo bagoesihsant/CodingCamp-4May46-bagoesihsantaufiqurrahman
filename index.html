@@ -10,9 +10,15 @@
   <!-- Theme Toggle -->
   <header class="dashboard-header">
     <h1 class="dashboard-title">Dashboard</h1>
-    <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
-      <span class="theme-icon" aria-hidden="true">🌙</span>
-    </button>
+    <div class="header-actions">
+      <!-- Auth Button (sign in / user info) -->
+      <div id="auth-header" class="auth-header">
+        <!-- Injected by JS: either sign-in button or user chip -->
+      </div>
+      <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+        <span class="theme-icon" aria-hidden="true">🌙</span>
+      </button>
+    </div>
   </header>
 
   <main class="dashboard-grid">
@@ -22,22 +28,6 @@
       <div id="clock" class="clock" aria-live="polite" aria-label="Current time">00:00:00</div>
       <div id="date-display" class="date-display"></div>
       <div id="greeting-text" class="greeting-text"></div>
-
-      <!-- Name Form -->
-      <form id="name-form" class="name-form" aria-label="Set your name">
-        <label for="name-input" class="sr-only">Your name</label>
-        <input
-          type="text"
-          id="name-input"
-          class="input"
-          placeholder="Enter your name…"
-          maxlength="50"
-          autocomplete="off"
-          aria-describedby="name-error"
-        />
-        <button type="submit" class="btn btn-primary">Save</button>
-      </form>
-      <div id="name-error" class="error-msg" aria-live="polite" role="alert"></div>
     </section>
 
     <!-- Pomodoro Timer Widget -->
@@ -135,6 +125,58 @@
   <footer class="dashboard-footer">
     <p>Copyright &copy; 2026 - Bagoes Ihsan Taufiqurrahman</p>
   </footer>
+
+  <!-- Auth Modal -->
+  <div id="auth-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="modal-box">
+      <button id="auth-modal-close" class="modal-close" aria-label="Close">✕</button>
+
+      <!-- Tabs -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tab-signup" role="tab" aria-selected="true" aria-controls="panel-signup">Sign Up</button>
+        <button class="auth-tab" id="tab-signin" role="tab" aria-selected="false" aria-controls="panel-signin">Sign In</button>
+      </div>
+
+      <!-- Sign Up Panel -->
+      <div id="panel-signup" class="auth-panel" role="tabpanel" aria-labelledby="tab-signup">
+        <h2 id="auth-modal-title" class="auth-panel-title">Create Account</h2>
+        <form id="signup-form" novalidate>
+          <div class="form-group">
+            <label for="signup-username" class="form-label">Username</label>
+            <input type="text" id="signup-username" class="input" placeholder="Choose a username" maxlength="30" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="signup-password" class="form-label">Password</label>
+            <input type="password" id="signup-password" class="input" placeholder="Choose a password" maxlength="128" autocomplete="new-password" />
+          </div>
+          <div class="form-group">
+            <label for="signup-confirm" class="form-label">Confirm Password</label>
+            <input type="password" id="signup-confirm" class="input" placeholder="Repeat your password" maxlength="128" autocomplete="new-password" />
+          </div>
+          <div id="signup-error" class="error-msg" aria-live="polite" role="alert"></div>
+          <button type="submit" class="btn btn-primary btn-full" id="signup-submit">Create Account</button>
+        </form>
+      </div>
+
+      <!-- Sign In Panel -->
+      <div id="panel-signin" class="auth-panel hidden" role="tabpanel" aria-labelledby="tab-signin">
+        <h2 class="auth-panel-title">Welcome Back</h2>
+        <form id="signin-form" novalidate>
+          <div class="form-group">
+            <label for="signin-username" class="form-label">Username</label>
+            <input type="text" id="signin-username" class="input" placeholder="Your username" maxlength="30" autocomplete="username" />
+          </div>
+          <div class="form-group">
+            <label for="signin-password" class="form-label">Password</label>
+            <input type="password" id="signin-password" class="input" placeholder="Your password" maxlength="128" autocomplete="current-password" />
+          </div>
+          <div id="signin-error" class="error-msg" aria-live="polite" role="alert"></div>
+          <button type="submit" class="btn btn-primary btn-full" id="signin-submit">Sign In</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
 
   <script src="js/app.js" defer></script>
 </body>
