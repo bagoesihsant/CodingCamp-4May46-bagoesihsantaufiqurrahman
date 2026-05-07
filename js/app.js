@@ -8,7 +8,7 @@
 /* ============================================================
    Constants
    ============================================================ */
-var SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
+const SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 /* ============================================================
    Utility: ID generation
@@ -24,10 +24,10 @@ function generateId() {
    Utility: SHA-256 hash (async, Web Crypto API)
    ============================================================ */
 function hashPassword(password) {
-  var encoder = new TextEncoder();
-  var data = encoder.encode(password);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
   return crypto.subtle.digest('SHA-256', data).then(function (hashBuffer) {
-    var hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
   });
 }
@@ -36,7 +36,7 @@ function hashPassword(password) {
    Utility: Error message display
    ============================================================ */
 function showError(elementId, message, type) {
-  var el = document.getElementById(elementId);
+  const el = document.getElementById(elementId);
   if (!el) return;
   el.textContent = message;
   el.className = 'error-msg ' + (type === 'warning' ? 'is-warning' : 'is-error');
@@ -47,7 +47,7 @@ function showError(elementId, message, type) {
 }
 
 function clearMsg(elementId) {
-  var el = document.getElementById(elementId);
+  const el = document.getElementById(elementId);
   if (!el) return;
   el.textContent = '';
   el.className = 'error-msg';
@@ -56,7 +56,7 @@ function clearMsg(elementId) {
 /* ============================================================
    App Namespace
    ============================================================ */
-var App = {};
+const App = {};
 
 /* ============================================================
    App.Storage — localStorage wrapper
@@ -64,7 +64,7 @@ var App = {};
 App.Storage = {
   get: function (key, defaultValue) {
     try {
-      var raw = localStorage.getItem(key);
+      const raw = localStorage.getItem(key);
       if (raw === null) return defaultValue;
       return JSON.parse(raw);
     } catch (e) {
@@ -104,7 +104,7 @@ App.Auth = {
 
   /* Load session from localStorage and validate timeout */
   loadSession: function () {
-    var session = App.Storage.get('pd_session', null);
+    const session = App.Storage.get('pd_session', null);
     if (!session) { this._session = null; return; }
     if (Date.now() > session.expiresAt) {
       App.Storage.remove('pd_session');
@@ -116,7 +116,7 @@ App.Auth = {
 
   /* Register a new user. Returns a Promise resolving to {ok, error} */
   register: function (username, displayName, password, confirmPassword) {
-    var trimUser = (username || '').trim();
+    const trimUser = (username || '').trim();
     if (trimUser.length === 0) {
       return Promise.resolve({ ok: false, error: 'Username cannot be empty.' });
     }
@@ -134,19 +134,19 @@ App.Auth = {
     }
 
     // displayName is optional — fall back to username if blank
-    var trimDisplay = (displayName || '').trim().slice(0, 50);
+    let trimDisplay = (displayName || '').trim().slice(0, 50);
     if (trimDisplay.length === 0) trimDisplay = trimUser;
 
-    var users = App.Storage.get('pd_users', []);
-    var lowerUser = trimUser.toLowerCase();
-    for (var i = 0; i < users.length; i++) {
+    const users = App.Storage.get('pd_users', []);
+    const lowerUser = trimUser.toLowerCase();
+    for (let i = 0; i < users.length; i++) {
       if (users[i].username.toLowerCase() === lowerUser) {
         return Promise.resolve({ ok: false, error: 'Username already taken.' });
       }
     }
 
     return hashPassword(password).then(function (hash) {
-      var newUser = {
+      const newUser = {
         id: generateId(),
         username: trimUser,
         displayName: trimDisplay,
@@ -161,7 +161,7 @@ App.Auth = {
 
   /* Login. Returns a Promise resolving to {ok, error} */
   login: function (username, password) {
-    var trimUser = (username || '').trim();
+    const trimUser = (username || '').trim();
     if (trimUser.length === 0) {
       return Promise.resolve({ ok: false, error: 'Please enter your username.' });
     }
@@ -169,10 +169,10 @@ App.Auth = {
       return Promise.resolve({ ok: false, error: 'Please enter your password.' });
     }
 
-    var users = App.Storage.get('pd_users', []);
-    var lowerUser = trimUser.toLowerCase();
-    var found = null;
-    for (var i = 0; i < users.length; i++) {
+    const users = App.Storage.get('pd_users', []);
+    const lowerUser = trimUser.toLowerCase();
+    let found = null;
+    for (let i = 0; i < users.length; i++) {
       if (users[i].username.toLowerCase() === lowerUser) {
         found = users[i];
         break;
@@ -186,7 +186,7 @@ App.Auth = {
       if (hash !== found.passwordHash) {
         return { ok: false, error: 'Incorrect password.' };
       }
-      var session = {
+      const session = {
         user: { id: found.id, username: found.username, displayName: found.displayName || found.username },
         loginAt: Date.now(),
         expiresAt: Date.now() + SESSION_TIMEOUT_MS
@@ -211,16 +211,16 @@ App.Theme = {
   _current: 'light',
 
   _themeKey: function () {
-    var user = App.Auth.currentUser();
+    const user = App.Auth.currentUser();
     return user ? App.Auth.scopedKey(user.id, 'theme') : 'pd_theme';
   },
 
   init: function () {
-    var saved = App.Storage.get(this._themeKey(), null);
+    const saved = App.Storage.get(this._themeKey(), null);
     if (saved === 'light' || saved === 'dark') {
       this._current = saved;
     } else {
-      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       this._current = prefersDark ? 'dark' : 'light';
     }
     this._apply(this._current);
@@ -234,9 +234,9 @@ App.Theme = {
 
   _apply: function (theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    var btn = document.getElementById('theme-toggle');
+    const btn = document.getElementById('theme-toggle');
     if (!btn) return;
-    var icon = btn.querySelector('.theme-icon');
+    const icon = btn.querySelector('.theme-icon');
     if (theme === 'dark') {
       if (icon) icon.textContent = '☀️';
       btn.setAttribute('aria-label', 'Switch to light mode');
@@ -261,29 +261,29 @@ App.Greeting = {
     this._renderDate();
     this._renderGreeting();
     this._tick();
-    var self = this;
+    const self = this;
     this._intervalId = setInterval(function () {
       self._tick();
     }, 1000);
   },
 
   _tick: function () {
-    var now = new Date();
-    var hh = String(now.getHours()).padStart(2, '0');
-    var mm = String(now.getMinutes()).padStart(2, '0');
-    var ss = String(now.getSeconds()).padStart(2, '0');
-    var clockEl = document.getElementById('clock');
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    const clockEl = document.getElementById('clock');
     if (clockEl) clockEl.textContent = hh + ':' + mm + ':' + ss;
   },
 
   _renderDate: function () {
-    var now = new Date();
-    var weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    var months = ['January', 'February', 'March', 'April', 'May', 'June',
+    const now = new Date();
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
                   'July', 'August', 'September', 'October', 'November', 'December'];
-    var dateStr = weekdays[now.getDay()] + ', ' + now.getDate() + ' ' +
+    const dateStr = weekdays[now.getDay()] + ', ' + now.getDate() + ' ' +
                   months[now.getMonth()] + ' ' + now.getFullYear();
-    var el = document.getElementById('date-display');
+    const el = document.getElementById('date-display');
     if (el) el.textContent = dateStr;
   },
 
@@ -294,17 +294,17 @@ App.Greeting = {
   },
 
   _renderGreeting: function () {
-    var hour = new Date().getHours();
-    var phrase = this._getGreetingPhrase(hour);
-    var user = App.Auth.currentUser();
-    var text;
+    const hour = new Date().getHours();
+    const phrase = this._getGreetingPhrase(hour);
+    const user = App.Auth.currentUser();
+    let text;
     if (user) {
-      var name = user.displayName || user.username;
+      const name = user.displayName || user.username;
       text = 'Welcome ' + name + ', ' + phrase;
     } else {
       text = phrase + ', Welcome';
     }
-    var el = document.getElementById('greeting-text');
+    const el = document.getElementById('greeting-text');
     if (el) el.textContent = text;
   }
 };
@@ -321,16 +321,16 @@ App.AuthUI = {
 
   /* Render the sign-in button or user chip in the header */
   _renderHeader: function () {
-    var container = document.getElementById('auth-header');
+    const container = document.getElementById('auth-header');
     if (!container) return;
-    var user = App.Auth.currentUser();
+    const user = App.Auth.currentUser();
     if (user) {
       container.innerHTML =
         '<div class="user-chip">' +
           '<span class="user-chip-name" aria-label="Logged in as ' + user.username + '">👤 ' + user.username + '</span>' +
           '<button id="logout-btn" class="btn btn-secondary btn-sm" aria-label="Sign out">Sign Out</button>' +
         '</div>';
-      var logoutBtn = document.getElementById('logout-btn');
+      const logoutBtn = document.getElementById('logout-btn');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', function () {
           App.AuthUI._onLogout();
@@ -339,7 +339,7 @@ App.AuthUI = {
     } else {
       container.innerHTML =
         '<button id="signin-open-btn" class="btn btn-primary btn-sm" aria-label="Sign in or create account">Sign In</button>';
-      var openBtn = document.getElementById('signin-open-btn');
+      const openBtn = document.getElementById('signin-open-btn');
       if (openBtn) {
         openBtn.addEventListener('click', function () {
           App.AuthUI.openModal('signin');
@@ -350,7 +350,7 @@ App.AuthUI = {
 
   /* Open the modal, optionally switching to a tab */
   openModal: function (tab) {
-    var modal = document.getElementById('auth-modal');
+    const modal = document.getElementById('auth-modal');
     if (!modal) return;
     modal.classList.remove('hidden');
     document.body.classList.add('modal-open');
@@ -359,30 +359,28 @@ App.AuthUI = {
     } else {
       this._switchTab('signup');
     }
-    // Focus first input
-    var firstInput = modal.querySelector('input');
+    const firstInput = modal.querySelector('input');
     if (firstInput) setTimeout(function () { firstInput.focus(); }, 50);
   },
 
   closeModal: function () {
-    var modal = document.getElementById('auth-modal');
+    const modal = document.getElementById('auth-modal');
     if (!modal) return;
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
     clearMsg('signup-error');
     clearMsg('signin-error');
-    // Reset forms
-    var sf = document.getElementById('signup-form');
-    var lf = document.getElementById('signin-form');
+    const sf = document.getElementById('signup-form');
+    const lf = document.getElementById('signin-form');
     if (sf) sf.reset();
     if (lf) lf.reset();
   },
 
   _switchTab: function (tab) {
-    var tabSignup = document.getElementById('tab-signup');
-    var tabSignin = document.getElementById('tab-signin');
-    var panelSignup = document.getElementById('panel-signup');
-    var panelSignin = document.getElementById('panel-signin');
+    const tabSignup = document.getElementById('tab-signup');
+    const tabSignin = document.getElementById('tab-signin');
+    const panelSignup = document.getElementById('panel-signup');
+    const panelSignin = document.getElementById('panel-signin');
     if (tab === 'signin') {
       tabSignin.classList.add('active');
       tabSignin.setAttribute('aria-selected', 'true');
@@ -401,11 +399,11 @@ App.AuthUI = {
   },
 
   _bindModal: function () {
-    var closeBtn = document.getElementById('auth-modal-close');
+    const closeBtn = document.getElementById('auth-modal-close');
     if (closeBtn) {
       closeBtn.addEventListener('click', function () { App.AuthUI.closeModal(); });
     }
-    var overlay = document.getElementById('auth-modal');
+    const overlay = document.getElementById('auth-modal');
     if (overlay) {
       overlay.addEventListener('click', function (e) {
         if (e.target === overlay) App.AuthUI.closeModal();
@@ -414,21 +412,21 @@ App.AuthUI = {
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') App.AuthUI.closeModal();
     });
-    var tabSignup = document.getElementById('tab-signup');
-    var tabSignin = document.getElementById('tab-signin');
+    const tabSignup = document.getElementById('tab-signup');
+    const tabSignin = document.getElementById('tab-signin');
     if (tabSignup) tabSignup.addEventListener('click', function () { App.AuthUI._switchTab('signup'); });
     if (tabSignin) tabSignin.addEventListener('click', function () { App.AuthUI._switchTab('signin'); });
   },
 
   _bindForms: function () {
-    var signupForm = document.getElementById('signup-form');
+    const signupForm = document.getElementById('signup-form');
     if (signupForm) {
       signupForm.addEventListener('submit', function (e) {
         e.preventDefault();
         App.AuthUI._onSignup();
       });
     }
-    var signinForm = document.getElementById('signin-form');
+    const signinForm = document.getElementById('signin-form');
     if (signinForm) {
       signinForm.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -438,11 +436,11 @@ App.AuthUI = {
   },
 
   _onSignup: function () {
-    var username = document.getElementById('signup-username').value;
-    var displayName = document.getElementById('signup-displayname').value;
-    var password = document.getElementById('signup-password').value;
-    var confirm = document.getElementById('signup-confirm').value;
-    var submitBtn = document.getElementById('signup-submit');
+    const username = document.getElementById('signup-username').value;
+    const displayName = document.getElementById('signup-displayname').value;
+    const password = document.getElementById('signup-password').value;
+    const confirm = document.getElementById('signup-confirm').value;
+    const submitBtn = document.getElementById('signup-submit');
     if (submitBtn) submitBtn.disabled = true;
 
     App.Auth.register(username, displayName, password, confirm).then(function (result) {
@@ -451,7 +449,6 @@ App.AuthUI = {
         showError('signup-error', result.error, 'error');
         return;
       }
-      // Auto-login after registration
       App.Auth.login(username, password).then(function (loginResult) {
         if (loginResult.ok) {
           App.AuthUI._onAuthSuccess();
@@ -461,9 +458,9 @@ App.AuthUI = {
   },
 
   _onSignin: function () {
-    var username = document.getElementById('signin-username').value;
-    var password = document.getElementById('signin-password').value;
-    var submitBtn = document.getElementById('signin-submit');
+    const username = document.getElementById('signin-username').value;
+    const password = document.getElementById('signin-password').value;
+    const submitBtn = document.getElementById('signin-submit');
     if (submitBtn) submitBtn.disabled = true;
 
     App.Auth.login(username, password).then(function (result) {
@@ -512,35 +509,34 @@ App.Timer = {
   _isRunning: false,
 
   _durationKey: function () {
-    var user = App.Auth.currentUser();
+    const user = App.Auth.currentUser();
     return user ? App.Auth.scopedKey(user.id, 'pomoDuration') : 'pd_pomoDuration';
   },
 
   init: function () {
-    var savedMinutes = App.Storage.get(this._durationKey(), 25);
-    var minutes = (typeof savedMinutes === 'number' && savedMinutes >= 1 && savedMinutes <= 120)
+    const savedMinutes = App.Storage.get(this._durationKey(), 25);
+    const minutes = (typeof savedMinutes === 'number' && savedMinutes >= 1 && savedMinutes <= 120)
       ? savedMinutes : 25;
     this._configured = minutes * 60;
     this._remaining = this._configured;
     this._isRunning = false;
     if (this._intervalId) { clearInterval(this._intervalId); this._intervalId = null; }
     this._render();
-    var completeMsg = document.getElementById('timer-complete-msg');
+    const completeMsg = document.getElementById('timer-complete-msg');
     if (completeMsg) completeMsg.classList.add('hidden');
   },
 
   start: function () {
     if (this._isRunning) return;
-    // If timer reached 0, reset first
     if (this._remaining <= 0) {
       this._remaining = this._configured;
     }
     this._isRunning = true;
-    var startBtn = document.getElementById('timer-start');
+    const startBtn = document.getElementById('timer-start');
     if (startBtn) startBtn.disabled = true;
-    var completeMsg = document.getElementById('timer-complete-msg');
+    const completeMsg = document.getElementById('timer-complete-msg');
     if (completeMsg) completeMsg.classList.add('hidden');
-    var self = this;
+    const self = this;
     this._intervalId = setInterval(function () {
       self._tick();
     }, 1000);
@@ -550,7 +546,7 @@ App.Timer = {
     clearInterval(this._intervalId);
     this._intervalId = null;
     this._isRunning = false;
-    var startBtn = document.getElementById('timer-start');
+    const startBtn = document.getElementById('timer-start');
     if (startBtn) startBtn.disabled = false;
   },
 
@@ -558,7 +554,7 @@ App.Timer = {
     this.stop();
     this._remaining = this._configured;
     this._render();
-    var completeMsg = document.getElementById('timer-complete-msg');
+    const completeMsg = document.getElementById('timer-complete-msg');
     if (completeMsg) completeMsg.classList.add('hidden');
   },
 
@@ -577,17 +573,16 @@ App.Timer = {
     clearInterval(this._intervalId);
     this._intervalId = null;
     this._isRunning = false;
-    var startBtn = document.getElementById('timer-start');
+    const startBtn = document.getElementById('timer-start');
     if (startBtn) startBtn.disabled = false;
-    var completeMsg = document.getElementById('timer-complete-msg');
+    const completeMsg = document.getElementById('timer-complete-msg');
     if (completeMsg) completeMsg.classList.remove('hidden');
-    // Audible beep via Web Audio API
     try {
-      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
-        var ctx = new AudioCtx();
-        var oscillator = ctx.createOscillator();
-        var gainNode = ctx.createGain();
+        const ctx = new AudioCtx();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
         oscillator.connect(gainNode);
         gainNode.connect(ctx.destination);
         oscillator.type = 'sine';
@@ -603,15 +598,15 @@ App.Timer = {
   },
 
   _render: function () {
-    var displayEl = document.getElementById('timer-display');
+    const displayEl = document.getElementById('timer-display');
     if (displayEl) displayEl.textContent = this._formatTime(this._remaining);
-    var startBtn = document.getElementById('timer-start');
+    const startBtn = document.getElementById('timer-start');
     if (startBtn) startBtn.disabled = this._isRunning;
   },
 
   _formatTime: function (secs) {
-    var m = Math.floor(secs / 60);
-    var s = secs % 60;
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
     return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
   }
 };
@@ -622,22 +617,22 @@ App.Timer = {
 App.TimerConfig = {
   init: function () {
     this._loadSaved();
-    var applyBtn = document.getElementById('duration-apply');
+    const applyBtn = document.getElementById('duration-apply');
     if (applyBtn) {
       applyBtn.addEventListener('click', this._onApply.bind(this));
     }
   },
 
   _loadSaved: function () {
-    var savedMinutes = App.Storage.get(App.Timer._durationKey(), 25);
-    var minutes = (typeof savedMinutes === 'number' && savedMinutes >= 1 && savedMinutes <= 120)
+    const savedMinutes = App.Storage.get(App.Timer._durationKey(), 25);
+    const minutes = (typeof savedMinutes === 'number' && savedMinutes >= 1 && savedMinutes <= 120)
       ? savedMinutes : 25;
-    var input = document.getElementById('duration-input');
+    const input = document.getElementById('duration-input');
     if (input) input.value = minutes;
   },
 
   _validate: function (value) {
-    var num = Number(value);
+    const num = Number(value);
     if (!Number.isInteger(num) || num < 1 || num > 120) {
       return { valid: false, message: 'Please enter a whole number between 1 and 120.' };
     }
@@ -646,9 +641,9 @@ App.TimerConfig = {
 
   _onApply: function (e) {
     e.preventDefault();
-    var input = document.getElementById('duration-input');
+    const input = document.getElementById('duration-input');
     if (!input) return;
-    var result = this._validate(input.value);
+    const result = this._validate(input.value);
     if (!result.valid) {
       showError('duration-error', result.message, 'error');
       return;
@@ -658,7 +653,7 @@ App.TimerConfig = {
     App.Timer._configured = result.minutes * 60;
     App.Timer._remaining = App.Timer._configured;
     App.Timer._render();
-    var completeMsg = document.getElementById('timer-complete-msg');
+    const completeMsg = document.getElementById('timer-complete-msg');
     if (completeMsg) completeMsg.classList.add('hidden');
     App.Storage.set(App.Timer._durationKey(), result.minutes);
   }
@@ -672,7 +667,7 @@ App.Todo = {
   _sortMode: 'default',
 
   _tasksKey: function () {
-    var user = App.Auth.currentUser();
+    const user = App.Auth.currentUser();
     return user ? App.Auth.scopedKey(user.id, 'tasks') : 'pd_tasks';
   },
 
@@ -680,17 +675,15 @@ App.Todo = {
     this._load();
     this._render();
 
-    // Attach add button listener
-    var addBtn = document.getElementById('task-add-btn');
+    const addBtn = document.getElementById('task-add-btn');
     if (addBtn) {
       addBtn.addEventListener('click', function () {
-        var input = document.getElementById('task-input');
+        const input = document.getElementById('task-input');
         if (input) App.Todo.addTask(input.value);
       });
     }
 
-    // Allow Enter key in task input
-    var taskInput = document.getElementById('task-input');
+    const taskInput = document.getElementById('task-input');
     if (taskInput) {
       taskInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
@@ -703,16 +696,14 @@ App.Todo = {
       });
     }
 
-    // Sort control
-    var sortSelect = document.getElementById('task-sort');
+    const sortSelect = document.getElementById('task-sort');
     if (sortSelect) {
       sortSelect.addEventListener('change', function () {
         App.Todo.setSort(sortSelect.value);
       });
     }
 
-    // Event delegation on task list
-    var taskList = document.getElementById('task-list');
+    const taskList = document.getElementById('task-list');
     if (taskList) {
       taskList.addEventListener('change', this._handleEvent.bind(this));
       taskList.addEventListener('click', this._handleEvent.bind(this));
@@ -720,17 +711,16 @@ App.Todo = {
     }
   },
 
-  /* Reload tasks from storage (called on login/logout) */
   _reload: function () {
     this._sortMode = 'default';
-    var sortSelect = document.getElementById('task-sort');
+    const sortSelect = document.getElementById('task-sort');
     if (sortSelect) sortSelect.value = 'default';
     this._load();
     this._render();
   },
 
   _load: function () {
-    var loaded = App.Storage.get(this._tasksKey(), null);
+    const loaded = App.Storage.get(this._tasksKey(), null);
     if (Array.isArray(loaded)) {
       this._tasks = loaded;
     } else if (loaded !== null) {
@@ -742,27 +732,26 @@ App.Todo = {
   },
 
   addTask: function (description) {
-    var trimmed = (description || '').trim();
+    const trimmed = (description || '').trim();
     if (trimmed.length === 0) {
       showError('task-error', 'Task description cannot be empty.', 'error');
       return;
     }
-    // Duplicate check (case-insensitive)
-    var lowerTrimmed = trimmed.toLowerCase();
-    for (var i = 0; i < this._tasks.length; i++) {
+    const lowerTrimmed = trimmed.toLowerCase();
+    for (let i = 0; i < this._tasks.length; i++) {
       if (this._tasks[i].description.toLowerCase() === lowerTrimmed) {
         showError('task-error', 'A task with this description already exists.', 'warning');
         return;
       }
     }
-    var task = {
+    const task = {
       id: generateId(),
       description: trimmed,
       completed: false,
       createdAt: Date.now()
     };
     this._tasks.push(task);
-    var input = document.getElementById('task-input');
+    const input = document.getElementById('task-input');
     if (input) input.value = '';
     clearMsg('task-error');
     this._persist();
@@ -770,7 +759,7 @@ App.Todo = {
   },
 
   editTask: function (id, newDescription) {
-    var trimmed = (newDescription || '').trim();
+    const trimmed = (newDescription || '').trim();
     if (trimmed.length === 0) {
       showError('task-error', 'Task description cannot be empty.', 'error');
       return false;
@@ -779,7 +768,7 @@ App.Todo = {
       showError('task-error', 'Task description must be 200 characters or fewer.', 'error');
       return false;
     }
-    for (var i = 0; i < this._tasks.length; i++) {
+    for (let i = 0; i < this._tasks.length; i++) {
       if (this._tasks[i].id === id) {
         this._tasks[i].description = trimmed;
         this._persist();
@@ -791,7 +780,7 @@ App.Todo = {
   },
 
   toggleComplete: function (id) {
-    for (var i = 0; i < this._tasks.length; i++) {
+    for (let i = 0; i < this._tasks.length; i++) {
       if (this._tasks[i].id === id) {
         this._tasks[i].completed = !this._tasks[i].completed;
         this._persist();
@@ -813,7 +802,7 @@ App.Todo = {
   },
 
   _getSorted: function () {
-    var copy = this._tasks.slice();
+    const copy = this._tasks.slice();
     if (this._sortMode === 'az') {
       copy.sort(function (a, b) {
         return a.description.toLowerCase().localeCompare(b.description.toLowerCase());
@@ -833,35 +822,35 @@ App.Todo = {
   },
 
   _persist: function () {
-    var result = App.Storage.set(this._tasksKey(), this._tasks);
+    const result = App.Storage.set(this._tasksKey(), this._tasks);
     if (!result.ok) {
       showError('task-error', 'Could not save changes. Storage may be full.', 'error');
     }
   },
 
   _render: function () {
-    var list = document.getElementById('task-list');
+    const list = document.getElementById('task-list');
     if (!list) return;
-    var sorted = this._getSorted();
+    const sorted = this._getSorted();
     if (sorted.length === 0) {
       list.innerHTML = '';
       return;
     }
-    var html = '';
-    for (var i = 0; i < sorted.length; i++) {
+    let html = '';
+    for (let i = 0; i < sorted.length; i++) {
       html += this._renderItem(sorted[i]);
     }
     list.innerHTML = html;
   },
 
   _renderItem: function (task) {
-    var escapedDesc = task.description
+    const escapedDesc = task.description
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
-    var completedClass = task.completed ? ' completed' : '';
-    var checkedAttr = task.completed ? ' checked' : '';
+    const completedClass = task.completed ? ' completed' : '';
+    const checkedAttr = task.completed ? ' checked' : '';
     return '<li class="task-item' + completedClass + '" data-id="' + task.id + '">' +
       '<input type="checkbox" class="task-checkbox" aria-label="Mark task complete"' + checkedAttr + ' />' +
       '<span class="task-description">' + escapedDesc + '</span>' +
@@ -873,32 +862,28 @@ App.Todo = {
   },
 
   _handleEvent: function (e) {
-    var target = e.target;
-    var li = target.closest('li[data-id]');
+    const target = e.target;
+    const li = target.closest('li[data-id]');
     if (!li) return;
-    var id = li.dataset.id;
+    const id = li.dataset.id;
 
-    // Checkbox toggle
     if (target.classList.contains('task-checkbox') && e.type === 'change') {
       App.Todo.toggleComplete(id);
       return;
     }
 
-    // Delete button
     if (target.closest('.task-delete-btn') && e.type === 'click') {
       App.Todo.deleteTask(id);
       return;
     }
 
-    // Edit button — switch to inline edit mode
     if (target.closest('.task-edit-btn') && e.type === 'click') {
-      var descSpan = li.querySelector('.task-description');
+      const descSpan = li.querySelector('.task-description');
       if (!descSpan) return;
-      var currentText = descSpan.textContent;
-      var actionsDiv = li.querySelector('.task-actions');
+      const currentText = descSpan.textContent;
+      const actionsDiv = li.querySelector('.task-actions');
 
-      // Replace span with input
-      var editInput = document.createElement('input');
+      const editInput = document.createElement('input');
       editInput.type = 'text';
       editInput.className = 'task-edit-input';
       editInput.value = currentText;
@@ -906,14 +891,13 @@ App.Todo = {
       editInput.setAttribute('aria-label', 'Edit task description');
       li.replaceChild(editInput, descSpan);
 
-      // Replace actions with confirm/cancel
-      var confirmBtn = document.createElement('button');
+      const confirmBtn = document.createElement('button');
       confirmBtn.className = 'btn btn-primary btn-icon task-confirm-btn';
       confirmBtn.setAttribute('aria-label', 'Confirm edit');
       confirmBtn.title = 'Confirm';
       confirmBtn.textContent = '✔';
 
-      var cancelBtn = document.createElement('button');
+      const cancelBtn = document.createElement('button');
       cancelBtn.className = 'btn btn-secondary btn-icon task-cancel-btn';
       cancelBtn.setAttribute('aria-label', 'Cancel edit');
       cancelBtn.title = 'Cancel';
@@ -928,33 +912,29 @@ App.Todo = {
       return;
     }
 
-    // Confirm edit
     if (target.closest('.task-confirm-btn') && e.type === 'click') {
-      var editInputEl = li.querySelector('.task-edit-input');
+      const editInputEl = li.querySelector('.task-edit-input');
       if (editInputEl) {
         App.Todo.editTask(id, editInputEl.value);
       }
       return;
     }
 
-    // Cancel edit
     if (target.closest('.task-cancel-btn') && e.type === 'click') {
       App.Todo._render();
       return;
     }
 
-    // Escape key cancels edit
     if (e.type === 'keydown' && e.key === 'Escape') {
-      var editEl = li.querySelector('.task-edit-input');
+      const editEl = li.querySelector('.task-edit-input');
       if (editEl) {
         App.Todo._render();
       }
       return;
     }
 
-    // Enter key confirms edit
     if (e.type === 'keydown' && e.key === 'Enter') {
-      var editInputEnter = li.querySelector('.task-edit-input');
+      const editInputEnter = li.querySelector('.task-edit-input');
       if (editInputEnter) {
         e.preventDefault();
         App.Todo.editTask(id, editInputEnter.value);
@@ -970,7 +950,7 @@ App.Links = {
   _links: [],
 
   _linksKey: function () {
-    var user = App.Auth.currentUser();
+    const user = App.Auth.currentUser();
     return user ? App.Auth.scopedKey(user.id, 'links') : 'pd_links';
   },
 
@@ -978,26 +958,23 @@ App.Links = {
     this._load();
     this._render();
 
-    // Add button
-    var addBtn = document.getElementById('link-add-btn');
+    const addBtn = document.getElementById('link-add-btn');
     if (addBtn) {
       addBtn.addEventListener('click', function () {
-        var labelInput = document.getElementById('link-label-input');
-        var urlInput = document.getElementById('link-url-input');
-        var label = labelInput ? labelInput.value : '';
-        var url = urlInput ? urlInput.value : '';
+        const labelInput = document.getElementById('link-label-input');
+        const urlInput = document.getElementById('link-url-input');
+        const label = labelInput ? labelInput.value : '';
+        const url = urlInput ? urlInput.value : '';
         App.Links.addLink(label, url);
       });
     }
 
-    // Clear error on input interaction
-    var labelInput = document.getElementById('link-label-input');
-    var urlInput = document.getElementById('link-url-input');
+    const labelInput = document.getElementById('link-label-input');
+    const urlInput = document.getElementById('link-url-input');
     if (labelInput) labelInput.addEventListener('input', function () { clearMsg('link-error'); });
     if (urlInput) urlInput.addEventListener('input', function () { clearMsg('link-error'); });
 
-    // Event delegation on links list
-    var linksList = document.getElementById('links-list');
+    const linksList = document.getElementById('links-list');
     if (linksList) {
       linksList.addEventListener('click', this._handleEvent.bind(this));
     }
@@ -1010,13 +987,13 @@ App.Links = {
   },
 
   _load: function () {
-    var loaded = App.Storage.get(this._linksKey(), null);
+    const loaded = App.Storage.get(this._linksKey(), null);
     this._links = Array.isArray(loaded) ? loaded : [];
   },
 
   _validateUrl: function (url) {
     try {
-      var parsed = new URL(url);
+      const parsed = new URL(url);
       return (parsed.protocol === 'http:' || parsed.protocol === 'https:') &&
              parsed.hostname.length > 0;
     } catch (e) {
@@ -1025,8 +1002,8 @@ App.Links = {
   },
 
   addLink: function (label, url) {
-    var trimmedLabel = (label || '').trim();
-    var trimmedUrl = (url || '').trim();
+    const trimmedLabel = (label || '').trim();
+    const trimmedUrl = (url || '').trim();
 
     if (trimmedLabel.length === 0) {
       showError('link-error', 'Please enter a label for the link.', 'error');
@@ -1040,8 +1017,7 @@ App.Links = {
       showError('link-error', 'URL must start with http:// or https:// and include a domain.', 'error');
       return;
     }
-    // Duplicate URL check
-    for (var i = 0; i < this._links.length; i++) {
+    for (let i = 0; i < this._links.length; i++) {
       if (this._links[i].url === trimmedUrl) {
         showError('link-error', 'This URL is already in your links.', 'error');
         return;
@@ -1052,16 +1028,15 @@ App.Links = {
       return;
     }
 
-    var link = {
+    const link = {
       id: generateId(),
       label: trimmedLabel,
       url: trimmedUrl
     };
     this._links.push(link);
 
-    // Clear inputs
-    var labelInput = document.getElementById('link-label-input');
-    var urlInput = document.getElementById('link-url-input');
+    const labelInput = document.getElementById('link-label-input');
+    const urlInput = document.getElementById('link-url-input');
     if (labelInput) labelInput.value = '';
     if (urlInput) urlInput.value = '';
     clearMsg('link-error');
@@ -1077,15 +1052,15 @@ App.Links = {
   },
 
   _persist: function () {
-    var result = App.Storage.set(this._linksKey(), this._links);
+    const result = App.Storage.set(this._linksKey(), this._links);
     if (!result.ok) {
       showError('link-error', 'Could not save changes. Storage may be full.', 'error');
     }
   },
 
   _render: function () {
-    var list = document.getElementById('links-list');
-    var emptyMsg = document.getElementById('links-empty');
+    const list = document.getElementById('links-list');
+    const emptyMsg = document.getElementById('links-empty');
     if (!list) return;
 
     if (this._links.length === 0) {
@@ -1095,20 +1070,20 @@ App.Links = {
     }
 
     if (emptyMsg) emptyMsg.classList.add('hidden');
-    var html = '';
-    for (var i = 0; i < this._links.length; i++) {
+    let html = '';
+    for (let i = 0; i < this._links.length; i++) {
       html += this._renderItem(this._links[i]);
     }
     list.innerHTML = html;
   },
 
   _renderItem: function (link) {
-    var escapedLabel = link.label
+    const escapedLabel = link.label
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
-    var escapedUrl = link.url
+    const escapedUrl = link.url
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -1121,10 +1096,10 @@ App.Links = {
   },
 
   _handleEvent: function (e) {
-    var target = e.target;
-    var li = target.closest('li[data-id]');
+    const target = e.target;
+    const li = target.closest('li[data-id]');
     if (!li) return;
-    var id = li.dataset.id;
+    const id = li.dataset.id;
     if (target.closest('.link-delete-btn')) {
       App.Links.deleteLink(id);
     }
@@ -1136,11 +1111,11 @@ App.Links = {
    ============================================================ */
 App.Disclaimer = {
   init: function () {
-    var seen = App.Storage.get('pd_disclaimer_seen', false);
+    const seen = App.Storage.get('pd_disclaimer_seen', false);
     if (!seen) {
       this._show();
     }
-    var acceptBtn = document.getElementById('disclaimer-accept');
+    const acceptBtn = document.getElementById('disclaimer-accept');
     if (acceptBtn) {
       acceptBtn.addEventListener('click', function () {
         App.Disclaimer._dismiss();
@@ -1149,17 +1124,17 @@ App.Disclaimer = {
   },
 
   _show: function () {
-    var modal = document.getElementById('disclaimer-modal');
+    const modal = document.getElementById('disclaimer-modal');
     if (!modal) return;
     modal.classList.remove('hidden');
     document.body.classList.add('modal-open');
-    var btn = document.getElementById('disclaimer-accept');
+    const btn = document.getElementById('disclaimer-accept');
     if (btn) setTimeout(function () { btn.focus(); }, 50);
   },
 
   _dismiss: function () {
     App.Storage.set('pd_disclaimer_seen', true);
-    var modal = document.getElementById('disclaimer-modal');
+    const modal = document.getElementById('disclaimer-modal');
     if (!modal) return;
     modal.classList.add('hidden');
     document.body.classList.remove('modal-open');
@@ -1181,7 +1156,7 @@ App.init = function () {
   App.Links.init();
 
   // Theme toggle
-  var themeToggle = document.getElementById('theme-toggle');
+  const themeToggle = document.getElementById('theme-toggle');
   if (themeToggle) {
     themeToggle.addEventListener('click', function () {
       App.Theme.toggle();
@@ -1189,9 +1164,9 @@ App.init = function () {
   }
 
   // Timer controls
-  var timerStart = document.getElementById('timer-start');
-  var timerStop = document.getElementById('timer-stop');
-  var timerReset = document.getElementById('timer-reset');
+  const timerStart = document.getElementById('timer-start');
+  const timerStop = document.getElementById('timer-stop');
+  const timerReset = document.getElementById('timer-reset');
   if (timerStart) timerStart.addEventListener('click', function () { App.Timer.start(); });
   if (timerStop) timerStop.addEventListener('click', function () { App.Timer.stop(); });
   if (timerReset) timerReset.addEventListener('click', function () { App.Timer.reset(); });
