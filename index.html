@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Theme Toggle -->
+  <header class="dashboard-header">
+    <h1 class="dashboard-title">Dashboard</h1>
+    <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+      <span class="theme-icon" aria-hidden="true">🌙</span>
+    </button>
+  </header>
+
+  <main class="dashboard-grid">
+
+    <!-- Greeting Widget -->
+    <section id="greeting-widget" class="widget widget--greeting" aria-label="Greeting">
+      <div id="clock" class="clock" aria-live="polite" aria-label="Current time">00:00:00</div>
+      <div id="date-display" class="date-display"></div>
+      <div id="greeting-text" class="greeting-text"></div>
+
+      <!-- Name Form -->
+      <form id="name-form" class="name-form" aria-label="Set your name">
+        <label for="name-input" class="sr-only">Your name</label>
+        <input
+          type="text"
+          id="name-input"
+          class="input"
+          placeholder="Enter your name…"
+          maxlength="50"
+          autocomplete="off"
+          aria-describedby="name-error"
+        />
+        <button type="submit" class="btn btn-primary">Save</button>
+      </form>
+      <div id="name-error" class="error-msg" aria-live="polite" role="alert"></div>
+    </section>
+
+    <!-- Pomodoro Timer Widget -->
+    <section id="timer-widget" class="widget widget--timer" aria-label="Pomodoro timer">
+      <h2 class="widget-title">Focus Timer</h2>
+      <div id="timer-display" class="timer-display" aria-live="polite" aria-label="Timer">25:00</div>
+      <div id="timer-complete-msg" class="timer-complete hidden" aria-live="polite" role="status">
+        🎉 Session complete!
+      </div>
+      <div class="timer-controls">
+        <button id="timer-start" class="btn btn-primary" aria-label="Start timer">Start</button>
+        <button id="timer-stop" class="btn btn-secondary" aria-label="Stop timer">Stop</button>
+        <button id="timer-reset" class="btn btn-secondary" aria-label="Reset timer">Reset</button>
+      </div>
+
+      <!-- Timer Config -->
+      <div id="timer-config" class="timer-config">
+        <label for="duration-input" class="config-label">Duration (minutes):</label>
+        <input
+          type="number"
+          id="duration-input"
+          class="input input-sm"
+          min="1"
+          max="120"
+          value="25"
+          aria-describedby="duration-error"
+          aria-label="Pomodoro duration in minutes"
+        />
+        <button id="duration-apply" class="btn btn-secondary" aria-label="Apply duration">Apply</button>
+        <div id="duration-error" class="error-msg" aria-live="polite" role="alert"></div>
+      </div>
+    </section>
+
+    <!-- To-Do Widget -->
+    <section id="todo-widget" class="widget widget--todo" aria-label="To-do list">
+      <h2 class="widget-title">To-Do</h2>
+      <div class="todo-add-row">
+        <label for="task-input" class="sr-only">New task</label>
+        <input
+          type="text"
+          id="task-input"
+          class="input"
+          placeholder="Add a task…"
+          maxlength="200"
+          autocomplete="off"
+          aria-describedby="task-error"
+        />
+        <button id="task-add-btn" class="btn btn-primary" aria-label="Add task">Add</button>
+      </div>
+      <div id="task-error" class="error-msg" aria-live="polite" role="alert"></div>
+      <div class="todo-sort-row">
+        <label for="task-sort" class="config-label">Sort:</label>
+        <select id="task-sort" class="select" aria-label="Sort tasks">
+          <option value="default">Default</option>
+          <option value="az">A–Z</option>
+          <option value="za">Z–A</option>
+          <option value="completed-last">Completed Last</option>
+        </select>
+      </div>
+      <ul id="task-list" class="task-list" aria-label="Tasks" aria-live="polite"></ul>
+    </section>
+
+    <!-- Quick Links Widget -->
+    <section id="links-widget" class="widget widget--links" aria-label="Quick links">
+      <h2 class="widget-title">Quick Links</h2>
+      <div class="links-add-form">
+        <label for="link-label-input" class="sr-only">Link label</label>
+        <input
+          type="text"
+          id="link-label-input"
+          class="input"
+          placeholder="Label"
+          maxlength="100"
+          autocomplete="off"
+          aria-describedby="link-error"
+        />
+        <label for="link-url-input" class="sr-only">Link URL</label>
+        <input
+          type="url"
+          id="link-url-input"
+          class="input"
+          placeholder="https://example.com"
+          autocomplete="off"
+          aria-describedby="link-error"
+        />
+        <button id="link-add-btn" class="btn btn-primary" aria-label="Add link">Add</button>
+      </div>
+      <div id="link-error" class="error-msg" aria-live="polite" role="alert"></div>
+      <div id="links-empty" class="empty-msg">No links saved yet.</div>
+      <ul id="links-list" class="links-list" aria-label="Quick links"></ul>
+    </section>
+
+  </main>
+
+  <footer class="dashboard-footer">
+    <p>Copyright &copy; 2026 - Bagoes Ihsan Taufiqurrahman</p>
+  </footer>
+
+  <script src="js/app.js" defer></script>
+</body>
+</html>
