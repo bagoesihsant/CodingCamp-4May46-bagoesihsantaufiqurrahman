@@ -115,7 +115,7 @@ App.Auth = {
   },
 
   /* Register a new user. Returns a Promise resolving to {ok, error} */
-  register: function (username, password, confirmPassword) {
+  register: function (username, displayName, password, confirmPassword) {
     var trimUser = (username || '').trim();
     if (trimUser.length === 0) {
       return Promise.resolve({ ok: false, error: 'Username cannot be empty.' });
@@ -133,6 +133,10 @@ App.Auth = {
       return Promise.resolve({ ok: false, error: 'Passwords do not match.' });
     }
 
+    // displayName is optional — fall back to username if blank
+    var trimDisplay = (displayName || '').trim().slice(0, 50);
+    if (trimDisplay.length === 0) trimDisplay = trimUser;
+
     var users = App.Storage.get('pd_users', []);
     var lowerUser = trimUser.toLowerCase();
     for (var i = 0; i < users.length; i++) {
@@ -145,6 +149,7 @@ App.Auth = {
       var newUser = {
         id: generateId(),
         username: trimUser,
+        displayName: trimDisplay,
         passwordHash: hash,
         createdAt: Date.now()
       };
@@ -182,7 +187,7 @@ App.Auth = {
         return { ok: false, error: 'Incorrect password.' };
       }
       var session = {
-        user: { id: found.id, username: found.username },
+        user: { id: found.id, username: found.username, displayName: found.displayName || found.username },
         loginAt: Date.now(),
         expiresAt: Date.now() + SESSION_TIMEOUT_MS
       };
@@ -294,7 +299,8 @@ App.Greeting = {
     var user = App.Auth.currentUser();
     var text;
     if (user) {
-      text = 'Welcome ' + user.username + ', ' + phrase;
+      var name = user.displayName || user.username;
+      text = 'Welcome ' + name + ', ' + phrase;
     } else {
       text = phrase + ', Welcome';
     }
@@ -433,12 +439,13 @@ App.AuthUI = {
 
   _onSignup: function () {
     var username = document.getElementById('signup-username').value;
+    var displayName = document.getElementById('signup-displayname').value;
     var password = document.getElementById('signup-password').value;
     var confirm = document.getElementById('signup-confirm').value;
     var submitBtn = document.getElementById('signup-submit');
     if (submitBtn) submitBtn.disabled = true;
 
-    App.Auth.register(username, password, confirm).then(function (result) {
+    App.Auth.register(username, displayName, password, confirm).then(function (result) {
       if (submitBtn) submitBtn.disabled = false;
       if (!result.ok) {
         showError('signup-error', result.error, 'error');
@@ -1125,12 +1132,48 @@ App.Links = {
 };
 
 /* ============================================================
+   App.Disclaimer — one-time disclaimer popup on first visit
+   ============================================================ */
+App.Disclaimer = {
+  init: function () {
+    var seen = App.Storage.get('pd_disclaimer_seen', false);
+    if (!seen) {
+      this._show();
+    }
+    var acceptBtn = document.getElementById('disclaimer-accept');
+    if (acceptBtn) {
+      acceptBtn.addEventListener('click', function () {
+        App.Disclaimer._dismiss();
+      });
+    }
+  },
+
+  _show: function () {
+    var modal = document.getElementById('disclaimer-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    var btn = document.getElementById('disclaimer-accept');
+    if (btn) setTimeout(function () { btn.focus(); }, 50);
+  },
+
+  _dismiss: function () {
+    App.Storage.set('pd_disclaimer_seen', true);
+    var modal = document.getElementById('disclaimer-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+  }
+};
+
+/* ============================================================
    App.init — bootstrap all modules
    ============================================================ */
 App.init = function () {
   App.Auth.loadSession();
   App.Theme.init();
   App.Greeting.init();
+  App.Disclaimer.init();
   App.AuthUI.init();
   App.Timer.init();
   App.TimerConfig.init();

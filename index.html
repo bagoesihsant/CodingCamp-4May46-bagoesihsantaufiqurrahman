@@ -126,6 +126,24 @@
     <p>Copyright &copy; 2026 - Bagoes Ihsan Taufiqurrahman</p>
   </footer>
 
+  <!-- Disclaimer Modal -->
+  <div id="disclaimer-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="disclaimer-title">
+    <div class="modal-box modal-box--disclaimer">
+      <div class="disclaimer-icon" aria-hidden="true">📋</div>
+      <h2 id="disclaimer-title" class="auth-panel-title">Before You Continue</h2>
+      <div class="disclaimer-body">
+        <p>This app is built for <strong>educational purposes only</strong> as part of a coding demo. Please keep the following in mind:</p>
+        <ul class="disclaimer-list">
+          <li>All data you enter — including your username, display name, tasks, and links — is stored <strong>only in your own browser's local storage</strong>. Nothing is sent to any server or third party.</li>
+          <li>Your session and most data will <strong>expire after 24 hours</strong>. Do not rely on this app for anything important.</li>
+          <li>As always, <strong>be mindful of what you share online</strong>. There is no need to use your real name or any sensitive information here.</li>
+        </ul>
+        <p class="disclaimer-footer-note">By continuing, you acknowledge that this is a demo project and use it at your own discretion.</p>
+      </div>
+      <button id="disclaimer-accept" class="btn btn-primary btn-full">I Understand, Continue</button>
+    </div>
+  </div>
+
   <!-- Auth Modal -->
   <div id="auth-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
     <div class="modal-box">
@@ -146,6 +164,11 @@
             <input type="text" id="signup-username" class="input" placeholder="Choose a username" maxlength="30" autocomplete="off" />
           </div>
           <div class="form-group">
+            <label for="signup-displayname" class="form-label">What do you want to be called?</label>
+            <input type="text" id="signup-displayname" class="input" placeholder="e.g. Alex, Captain, Anonymous…" maxlength="50" autocomplete="off" />
+            <span class="form-hint">Optional — leave blank to use your username.</span>
+          </div>
+          <div class="form-group">
             <label for="signup-password" class="form-label">Password</label>
             <input type="password" id="signup-password" class="input" placeholder="Choose a password" maxlength="128" autocomplete="new-password" />
           </div>
@@ -164,7 +187,7 @@
         <form id="signin-form" novalidate>
           <div class="form-group">
             <label for="signin-username" class="form-label">Username</label>
-            <input type="text" id="signin-username" class="input" placeholder="Your username" maxlength="30" autocomplete="username" />
+            <input type="text" id="signin-username" class="input" placeholder="Your username" maxlength="30" autocomplete="off" />
           </div>
           <div class="form-group">
             <label for="signin-password" class="form-label">Password</label>
